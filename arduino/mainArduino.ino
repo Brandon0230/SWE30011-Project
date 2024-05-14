@@ -1,5 +1,6 @@
 #include <Keypad.h>
 #include <LiquidCrystal.h>
+#include <Servo.h>
 
 const byte ROWS = 4; 
 const byte COLS = 4; 
@@ -16,6 +17,7 @@ byte colPins[COLS] = {7, 8, 9, 10};
 Keypad customKeypad = Keypad(makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS); 
 #define alcoholSensor A0
 #define PIRPin  2
+#define servoPin 11
 #define redPin 22
 #define greenPin 23
 #define bluePin 24
@@ -23,11 +25,13 @@ Keypad customKeypad = Keypad(makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS)
 int val = 0;
 const int rs = 45, en = 44, d4 = 43, d5 = 42, d6 = 41, d7 = 40;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+Servo servoM;
 bool motionState = false; // We start with no motion detected.
 bool lcdNewPin = true;
 bool bacTextPrinted = false;
 bool bacText2Printed = false;
-int currentState = 0; //O=Passcode, 1=Alcohol, 2=Open
+bool servoMoved = false;
+int currentState = 0; //O=Passcode, 1=Alcohol, 2=Open,3=Pending Re-lock
 String password = "1345";
 int bacLevel;
 String enteredPassword; //Array to store entered password
@@ -36,8 +40,9 @@ void setup() {
   pinMode(PIRPin, INPUT);
   pinMode(alcoholSensor, INPUT);
   pinMode(buttonPin, INPUT_PULLUP);
+  
   lcd.begin(16,2);
-  lcdIntial();
+  lcdInitial();
   // Begin serial communication at a baud rate of 9600:
   Serial.begin(9600);
 }
@@ -64,8 +69,14 @@ void loop() {
   } else if (currentState == 1) {
     toggleAlcohol();
   }
+  else if (currentState == 2) {
+    doorMotion(180);
+  }
+  else if (currentState == 3) {
+    lockDoor();
+  }
 }
-void lcdIntial() {
+void lcdInitial() {
   lcd.print("Please Enter Pin");
   lcd.setCursor(0,1);
   lcd.print("Then Press 'D'");
@@ -92,6 +103,7 @@ void togglePinPad() {
   if (customKey == 'D') {
     
   if (enteredPassword == password) {
+    enteredPassword = "";
     currentState = 1;
   }
   else {
@@ -119,38 +131,64 @@ int toggleAlcohol()  {
   bacLevel = analogRead(alcoholSensor);
   Serial.println(bacLevel);
   delay(2);
-  if (bacLevel > 100) {
-    lcd.clear();
-    lcd.print("Alcohol Detected");
-    lcd.setCursor(0,1);
-    lcd.print("Please Wait");
-    delay(500);
-    lcd.clear();
-    lcd.print("Door Locked");
-    lcd.setCursor(0,1);
-    lcd.print("Please Try Again");
-    delay(500);
-    currentState = 0;
-    enteredPassword = "";
-    bacText2Printed = false;
-    bacTextPrinted = false;
-    lcdNewPin = true;
-    lcd.clear();
-    lcdIntial();
-  } else {
-    lcd.clear();
-    lcd.print("No Alcohol Detected");
-    lcd.setCursor(0,1);
-    lcd.print("Door Unlocked");
-    currentState = 2;
+    if (bacLevel > 200) {
+      lcd.clear();
+      lcd.print("Alcohol Detected");
+      lcd.setCursor(0,1);
+      lcd.print("Please Wait");
+      delay(500);
+      lcd.clear();
+      lcd.print("Door Locked");
+      lcd.setCursor(0,1);
+      lcd.print("Please Try Again");
+      delay(500);
+      currentState = 0;
+      enteredPassword = "";
+      bacText2Printed = false;
+      bacTextPrinted = false;
+      lcdNewPin = true;
+      lcd.clear();
+      lcdInitial();
+  } 
+    else {
+      lcd.clear();
+      lcd.print("No Alcohol Detected");
+      lcd.setCursor(0,1);
+      lcd.print("Door Unlocked");
+      currentState = 2;
+    }
   }
-
 }
-
-}
-
 void setColour(int redVal, int greenVal, int blueVal) {
   analogWrite(redPin, redVal);
   analogWrite(greenPin, greenVal);
   analogWrite(bluePin, blueVal);
+}
+void doorMotion(int angle) {
+  if(servoMoved == false)
+  {
+  servoM.attach(11);
+  servoM.write(angle);
+  servoMoved = true;
+  currentState = 3;
+  delay(1000);
+  servoM.detach();
+  }
+}
+void lockDoor() {
+   if (digitalRead(buttonPin) == LOW) {
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print("Door is Locked.");
+      servoMoved = false;
+      doorMotion(0);
+      currentState = 0;
+      bacText2Printed = false;
+      bacTextPrinted = false;
+      servoMoved = false;
+      lcd.clear();
+      lcdInitial();
+      lcdNewPin = true;
+   }
+
 }
