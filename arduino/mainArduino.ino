@@ -19,12 +19,14 @@ Keypad customKeypad = Keypad(makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS)
 #define redPin 22
 #define greenPin 23
 #define bluePin 24
+#define buttonPin 25
 int val = 0;
 const int rs = 45, en = 44, d4 = 43, d5 = 42, d6 = 41, d7 = 40;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 bool motionState = false; // We start with no motion detected.
 bool lcdNewPin = true;
 bool bacTextPrinted = false;
+bool bacText2Printed = false;
 int currentState = 0; //O=Passcode, 1=Alcohol, 2=Open
 String password = "1345";
 int bacLevel;
@@ -33,43 +35,41 @@ void setup() {
   // Configure the pins as input or output:
   pinMode(PIRPin, INPUT);
   pinMode(alcoholSensor, INPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
   lcd.begin(16,2);
-  lcd.print("Please Enter Pin");
-  lcd.setCursor(0,1);
-  lcd.print("Then Press 'D'");
+  lcdIntial();
   // Begin serial communication at a baud rate of 9600:
   Serial.begin(9600);
 }
-
 void loop() {
-   if (currentState == 0) {
-      togglePinPad();
-   }
-   else if (currentState == 1) {
-      lcd.clear();
-      lcd.print("BAC Time :3");
-      toggleAlcohol();
-   }
-  // If motion is detected (pirPin = HIGH), do the following:
+  // Check the motion sensor
+  val = digitalRead(PIRPin);
   if (val == HIGH) {
-      setColour(255,255,255);
-    // Change the motion state to true (motion detected):
+    setColour(255,255,255);
     if (motionState == false) {
       Serial.println("Motion detected");
       motionState = true;
     }
-  }
-  // If no motion is detected (pirPin = LOW), do the following:
-  else {
-      setColour(0,0,0);
-    // Change the motion state to false (no motion):
+  } else {
+    setColour(0,0,0);
     if (motionState == true) {
       Serial.println("Motion ended");
       motionState = false;
     }
   }
-}
 
+  // Then check the current state
+  if (currentState == 0) {
+    togglePinPad();
+  } else if (currentState == 1) {
+    toggleAlcohol();
+  }
+}
+void lcdIntial() {
+  lcd.print("Please Enter Pin");
+  lcd.setCursor(0,1);
+  lcd.print("Then Press 'D'");
+}
 void togglePinPad() {
    char customKey = customKeypad.getKey();
   if (customKey == '1' || customKey == '2' || customKey == '3' || customKey == '4' || customKey == '5' || customKey == '6' || customKey == '7' || customKey == '8' || customKey == '9' || customKey == '0'){
@@ -108,9 +108,44 @@ void togglePinPad() {
 }
 
 int toggleAlcohol()  {
+  if (bacText2Printed == false) {
+        lcd.clear();
+      lcd.print("Blow for 5s");
+    lcd.setCursor(0,1);
+    lcd.print("Then Press Btn");
+    bacText2Printed = true;
+  }
+  if (digitalRead(buttonPin) == LOW) {
   bacLevel = analogRead(alcoholSensor);
   Serial.println(bacLevel);
-  delay(200);
+  delay(2);
+  if (bacLevel > 100) {
+    lcd.clear();
+    lcd.print("Alcohol Detected");
+    lcd.setCursor(0,1);
+    lcd.print("Please Wait");
+    delay(500);
+    lcd.clear();
+    lcd.print("Door Locked");
+    lcd.setCursor(0,1);
+    lcd.print("Please Try Again");
+    delay(500);
+    currentState = 0;
+    enteredPassword = "";
+    bacText2Printed = false;
+    bacTextPrinted = false;
+    lcdNewPin = true;
+    lcd.clear();
+    lcdIntial();
+  } else {
+    lcd.clear();
+    lcd.print("No Alcohol Detected");
+    lcd.setCursor(0,1);
+    lcd.print("Door Unlocked");
+    currentState = 2;
+  }
+
+}
 
 }
 
