@@ -33,13 +33,12 @@ bool lcdNewPin = true;
 bool bacTextPrinted = false;
 bool bacText2Printed = false;
 bool servoMoved = false;
-bool bacTooHigh = false;
 bool doorLocked = false;
 int currentState = 0; //O=Passcode, 1=Alcohol, 2=Open,3=Pending Re-lock
 String password = "1345";
 int bacLevel;
 String enteredPassword; //Array to store entered password
-const long interval = 500;
+const long interval = 750;
 unsigned long previousMillis = 0;
 unsigned long previousMillisDoorLock = 0;
 DHT dht(DHTPin, DHTTYPE);
@@ -56,20 +55,22 @@ void setup() {
   Serial.begin(9600);
 }
 void loop() {
-  Serial.println(float(dht.readTemperature()));
-  Serial.println(float(dht.readHumidity()));
+  Serial.print(float(dht.readTemperature()));
+  Serial.print(" ");
+  Serial.print(float(dht.readHumidity()));
+  Serial.print(" ");
   // Check the motion sensor
   val = digitalRead(PIRPin);
   if (val == HIGH) {
     setColour(255,255,255);
     if (motionState == false) {
-      Serial.println("Motion detected");
+      Serial.print("Motion detected");
+      Serial.print(" ");
       motionState = true;
     }
   } else {
     setColour(0,0,0);
     if (motionState == true) {
-      Serial.println("Motion ended");
       motionState = false;
     }
   }
@@ -96,7 +97,6 @@ void togglePinPad() {
    char customKey = customKeypad.getKey();
   if (customKey == '1' || customKey == '2' || customKey == '3' || customKey == '4' || customKey == '5' || customKey == '6' || customKey == '7' || customKey == '8' || customKey == '9' || customKey == '0'){
     enteredPassword += customKey;
-    Serial.println(enteredPassword);
     if (lcdNewPin) {
       lcd.clear();
       lcdNewPin = false;
@@ -143,9 +143,10 @@ int toggleAlcohol()  {
   }
   if (digitalRead(buttonPin) == LOW) {
   bacLevel = analogRead(alcoholSensor);
-  Serial.println(bacLevel);
+  Serial.print(bacLevel);
+  Serial.print(" ");
   delay(2);
-    if (bacLevel > 200 | bacTooHigh == true) {
+    if (bacLevel > 200) {
       lcd.clear();
       lcd.print("Alcohol Detected");
       lcd.setCursor(0,1);
@@ -213,7 +214,6 @@ void lockDoor() {
       lcd.clear();
       lcdInitial();
       lcdNewPin = true;
-      bacTooHigh = false;
       doorLocked = false;
     }
 }
