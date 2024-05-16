@@ -1,7 +1,7 @@
 #include <Keypad.h>
 #include <LiquidCrystal.h>
 #include <Servo.h>
-
+#include <DHT.h>
 const byte ROWS = 4; 
 const byte COLS = 4; 
 char hexaKeys[ROWS][COLS] = {
@@ -22,6 +22,8 @@ Keypad customKeypad = Keypad(makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS)
 #define greenPin 23
 #define bluePin 24
 #define buttonPin 25
+#define DHTPin 12
+#define DHTTYPE DHT11
 int val = 0;
 const int rs = 45, en = 44, d4 = 43, d5 = 42, d6 = 41, d7 = 40;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
@@ -31,22 +33,31 @@ bool lcdNewPin = true;
 bool bacTextPrinted = false;
 bool bacText2Printed = false;
 bool servoMoved = false;
+bool bacTooHigh = false;
+bool doorLocked = false;
 int currentState = 0; //O=Passcode, 1=Alcohol, 2=Open,3=Pending Re-lock
 String password = "1345";
 int bacLevel;
 String enteredPassword; //Array to store entered password
+const long interval = 500;
+unsigned long previousMillis = 0;
+unsigned long previousMillisDoorLock = 0;
+DHT dht(DHTPin, DHTTYPE);
+
 void setup() {
   // Configure the pins as input or output:
   pinMode(PIRPin, INPUT);
   pinMode(alcoholSensor, INPUT);
   pinMode(buttonPin, INPUT_PULLUP);
-  
+  dht.begin();
   lcd.begin(16,2);
   lcdInitial();
   // Begin serial communication at a baud rate of 9600:
   Serial.begin(9600);
 }
 void loop() {
+  Serial.println(float(dht.readTemperature()));
+  Serial.println(float(dht.readHumidity()));
   // Check the motion sensor
   val = digitalRead(PIRPin);
   if (val == HIGH) {
@@ -118,6 +129,9 @@ void togglePinPad() {
   // Read out the pirPin and store as val:
   val = digitalRead(PIRPin);
 }
+void logTempAndHum() {
+  
+}
 
 int toggleAlcohol()  {
   if (bacText2Printed == false) {
@@ -131,7 +145,7 @@ int toggleAlcohol()  {
   bacLevel = analogRead(alcoholSensor);
   Serial.println(bacLevel);
   delay(2);
-    if (bacLevel > 200) {
+    if (bacLevel > 200 | bacTooHigh == true) {
       lcd.clear();
       lcd.print("Alcohol Detected");
       lcd.setCursor(0,1);
@@ -165,23 +179,33 @@ void setColour(int redVal, int greenVal, int blueVal) {
   analogWrite(bluePin, blueVal);
 }
 void doorMotion(int angle) {
+  unsigned long currentMillis = millis();
   if(servoMoved == false)
   {
-  servoM.attach(11);
-  servoM.write(angle);
-  servoMoved = true;
-  currentState = 3;
-  delay(1000);
-  servoM.detach();
+    servoM.attach(11);
+    servoM.write(angle);
+    previousMillis = currentMillis;
+    servoMoved = true;
   }
-}
+  if (servoMoved == true && currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+    servoM.detach();
+    servoMoved = false;
+    currentState = 3;
+  }}
 void lockDoor() {
-   if (digitalRead(buttonPin) == LOW) {
+  unsigned long currentMillis = millis();
+  if (digitalRead(buttonPin) == LOW) {
+      doorLocked = true;
       lcd.clear();
       lcd.setCursor(0,0);
       lcd.print("Door is Locked.");
-      servoMoved = false;
       doorMotion(0);
+      previousMillisDoorLock = currentMillis;
+  }
+  if(doorLocked == true && currentMillis - previousMillisDoorLock >= interval){
+      previousMillisDoorLock = currentMillis;
+      servoM.detach();
       currentState = 0;
       bacText2Printed = false;
       bacTextPrinted = false;
@@ -189,6 +213,10 @@ void lockDoor() {
       lcd.clear();
       lcdInitial();
       lcdNewPin = true;
-   }
-
+      bacTooHigh = false;
+      doorLocked = false;
+    }
 }
+
+
+
