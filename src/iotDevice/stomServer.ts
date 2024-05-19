@@ -46,36 +46,29 @@ arduinoPort()
                 const humidity = parseFloat(parts[1]);
                 mqttEngine.sendMessage('sensor', `${temperature},${humidity}`);
             }
+            else if (parts.length == 3) {
+                const temperature = parseFloat(parts[0]);
+                const humidity = parseFloat(parts[1]);
+                const motionOut = parts[2];
+                mqttEngine.sendMessage('sensor', `${temperature},${humidity}`);
+                mqttEngine.sendMessage('motion', motionOut);
+            }
             else if (parts.length == 4) {
                 const temperature = parseFloat(parts[0]);
                 const humidity = parseFloat(parts[1]);
-                const buttonOut = parts[2] + " " + parts[3];
+                const motionOut = parts[2];
+                const doorUnlock = parts[3];
                 mqttEngine.sendMessage('sensor', `${temperature},${humidity}`);
-                mqttEngine.sendMessage('doorbell', buttonOut);
-
+                mqttEngine.sendMessage('motion', motionOut);
+                mqttEngine.sendMessage('door', doorUnlock);
             }
         }
-        );
-        mqttEngine.on('doorbell', (args) => {
-            if (port) {
-                switch (args) {
-                    case 'on':
-                        port.write('x');
-                        break;
-                    case 'off':
-                        port.write('y');
-                        break;
-                    default:
-                        console.warn('Unknown sensor command:', args);
-                        break;
-                }
-            }
-        });
+        );    
         mqttEngine.on('sensor', (args) => {
             if (port) {
                 switch (args) {
                     case 'on':
-                        port.write('z');
+                        port.write('y');
                         break;
                     case 'off':
                         port.write('z');
