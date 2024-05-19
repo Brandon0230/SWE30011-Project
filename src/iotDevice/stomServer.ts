@@ -32,8 +32,6 @@ function arduinoPort() {
             });
     });
 }
-
-
 arduinoPort()
     .then(portPath => {
         port = new SerialPort({path: portPath as string, baudRate: 9600 })
