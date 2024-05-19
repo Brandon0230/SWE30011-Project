@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Arduino Data</title>
+    <link rel="stylesheet" href="styles.css"/>
+    <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment/dist/chartjs-adapter-moment.min.js"></script>
+
+    <!-- <div id="data"></div>
+    <script src="/socket.io/socket.io.js"></script> -->
+    <script src="renderer.js"></script>
+</head>
+<body>
+    <h1>Arduino Data:</h1>
+    <div class="widget-container">
+        <div class="widget">
+            <div class="title">Status</div>
+            <div class="content">
+                <span id="Status">--</span>
+            </div>
+        </div>
+        <div class="widget">
+            <div class="title">Environment</div>
+            <div class="content">
+                <div class="widget-container">
+                    <div class="widget">
+                        <div class="title">Temperature</div>
+                        <div class="content">
+                            <div>
+                                <canvas id="temperatureChart"></canvas>
+                            </div>
+                            <div id="Temp">
+                                --
+                            </div>
+                        </div>
+                    </div>
+                    <div class="widget">
+                        <div class="title">Humidity</div>
+                        <div class="content">
+                            <div>
+                                <canvas id="humidityChart"></canvas>
+                            </div>
+                            <div id="Humid">
+                                --
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="widget">
+            <div class="title">Doorbell</div>
+            <div class="content">
+                <div id="doorButton">
+                    --
+                </div>
+            </div>
+        </div>
+        <div class="widget">
+            <div class="title">Light</div>
+            <div class="content">
+                <div id="Light">
+                    <input type="button" value="ON" id="onButton" onclick="">
+                    <input type="button" value="OFF" id="offButton" onclick="">
+                    <input type="button" value="SENSOR" id="sensorButton" onclick="">
+                    <br><br>
+                    <div id="lightState">Sensor On</div>
+                    <br><br>
+                    
+                    <label for="tempSlider">Hot Temperature:</label>
+                    <input type="range" id="tempSlider" name="slider" min="0" max="100" value="50">
+                    <span id ="tempSliderVal">50</span>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</body>
+</html>

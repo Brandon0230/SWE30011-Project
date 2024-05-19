@@ -1,0 +1,11 @@
+{
+    "mqtt": {
+        "broker": "mqtt.example.com",
+        "port": 1883
+    },
+    "topics": [
+        "temperature",
+        "humidity",
+        "doorbell"
+    ]
+}
