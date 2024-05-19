@@ -55,10 +55,16 @@ void setup() {
   Serial.begin(9600);
 }
 void loop() {
-  Serial.print(float(dht.readTemperature()));
-  Serial.print(" ");
-  Serial.print(float(dht.readHumidity()));
-  Serial.print(" ");
+    float temp = dht.readTemperature(); //reads Temp
+  float hum = dht.readHumidity(); //reads humidity
+    Serial.print(temp);
+     Serial.print(" ");
+  Serial.println(hum);
+
+   if (Serial.available() > 0) {
+    String receivedData = GetData(); // Call the GetData function to read the data
+    char receivedChar = receivedData.charAt(0); // Get the first character of the received data
+   }
   // Check the motion sensor
   val = digitalRead(PIRPin);
   if (val == HIGH) {
@@ -88,6 +94,19 @@ void loop() {
     lockDoor();
   }
 }
+
+
+String GetData() {
+  String receivedString = "";
+   while (Serial.available() > 0) {
+      char incomingChar = Serial.read(); // Read the incoming byte
+      receivedString += incomingChar; // Append the character to the string
+      delay(2); // Delay to allow the next character to arrive
+    }
+  return receivedString; // Return the received string
+}
+
+
 void lcdInitial() {
   lcd.print("Please Enter Pin");
   lcd.setCursor(0,1);
