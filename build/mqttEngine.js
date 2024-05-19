@@ -40,7 +40,7 @@ class MQTTEngine extends events_1.EventEmitter {
         this.client = null;
         this.connected = false;
         this.topics = [];
-        this.brokerUrl = brokerUrl;
+        this.brokerUrl = "mqtt://" + brokerUrl;
     }
     connect() {
         this.client = mqtt.connect(this.brokerUrl);
@@ -81,6 +81,7 @@ class MQTTEngine extends events_1.EventEmitter {
             this.client.on('message', (topic, message) => {
                 switch (topic) {
                     case 'home/sensor':
+                        console.log('Sensor data:', message.toString());
                         this.emit('sensor', message.toString());
                         break;
                     case 'home/doorbell':

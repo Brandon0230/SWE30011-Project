@@ -9,7 +9,7 @@ export default class MQTTEngine extends EventEmitter {
     private topics: string[] = [];
     constructor(brokerUrl: string){
         super();
-        this.brokerUrl = brokerUrl;
+        this.brokerUrl = "mqtt://" + brokerUrl;
 
     }
     public connect(){
@@ -50,6 +50,7 @@ export default class MQTTEngine extends EventEmitter {
         this.client.on('message', (topic: string, message: Buffer) => {
             switch (topic) {
                 case 'home/sensor':
+                    console.log('Sensor data:', message.toString());
                     this.emit('sensor', message.toString());
                     break;
                 case 'home/doorbell':

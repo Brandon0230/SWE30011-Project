@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "concurrently \"npm run start-iot\" \"npm run start-web\"",
+    "start": "concurrently \"npm run start-web\" \"npm run start-iot\"",
     "start-iot": "node build/iotDevice/stomServer.js",
     "start-web": "node build/webserver/app.js",
     "compile": "npx tsc"

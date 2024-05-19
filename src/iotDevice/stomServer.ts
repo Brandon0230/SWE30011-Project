@@ -1,11 +1,11 @@
 import { SerialPort } from "serialport";
-import * as Readline from "@serialport/parser-readline";
+const Readline = require('@serialport/parser-readline');
 import MQTTEngine from "../mqttEngine";
 
 const parser = new Readline.ReadlineParser({ delimiter: '\r\n' });
 let port: SerialPort<any>;
 let ardState = false;
-let mqttEngine = new MQTTEngine('mqtt://test.mosquitto.org');
+let mqttEngine = new MQTTEngine('192.168.1.31');
 mqttEngine.connect();
 
 mqttEngine.on('connect', () => {
@@ -36,20 +36,22 @@ function arduinoPort() {
 
 arduinoPort()
     .then(portPath => {
-        port = new SerialPort({ path: portPath as string, baudRate: 9600 })
+        port = new SerialPort({path: portPath as string, baudRate: 9600 })
         port.pipe(parser);
         ardState = true;
-        parser.on('data', data => {
+        parser.on('data', (data: string) => {
             const parts = data.trim().split(' ');
             if (parts.length === 2) {
                 const temperature = parseFloat(parts[0]);
                 const humidity = parseFloat(parts[1]);
+                console.log(temperature);
                 mqttEngine.sendMessage('sensor', `${temperature},${humidity}`);
             }
             else if (parts.length == 3) {
                 const temperature = parseFloat(parts[0]);
                 const humidity = parseFloat(parts[1]);
                 const motionOut = parts[2];
+                console.log(temperature);
                 mqttEngine.sendMessage('sensor', `${temperature},${humidity}`);
                 mqttEngine.sendMessage('motion', motionOut);
             }
@@ -58,6 +60,7 @@ arduinoPort()
                 const humidity = parseFloat(parts[1]);
                 const motionOut = parts[2];
                 const doorUnlock = parts[3];
+                console.log(temperature);
                 mqttEngine.sendMessage('sensor', `${temperature},${humidity}`);
                 mqttEngine.sendMessage('motion', motionOut);
                 mqttEngine.sendMessage('door', doorUnlock);

@@ -9,7 +9,7 @@ import MQTTEngine from "../mqttEngine";
 const app = express();
 const server = http.createServer(app);
 const io = new socketIO.Server(server);
-const mqttEngine = new MQTTEngine('mqtt://test.mosquitto.org');
+const mqttEngine = new MQTTEngine('192.168.1.31');
 const dataBase1 = new sqlite3.Database('sensorData.db');
 let sensorData = {temp: 0, humidity: 0, button_pressed: 0};
 
@@ -52,8 +52,10 @@ io.on('connection', socket => {
             mqttEngine.sendMessage('sensor', 'on');
         });
         mqttEngine.on('sensor', (args) => {
+            console.log(args);
             const parts = args.split(',');
             sensorData.temp = parseFloat(parts[0]);
+            console.log(sensorData.temp);
             sensorData.humidity = parseFloat(parts[1]);
             io.emit('temp', sensorData.temp);
             io.emit('hum', sensorData.humidity);
@@ -68,6 +70,8 @@ server.listen(3000, () => {
 });
 
 function saveDataToDB(dateTime: string, temperature: number, humidity: number, buttonPressed: number) {
+
+    dataBase1.run('CREATE TABLE IF NOT EXISTS sensorData (datetime TEXT, temperature REAL, humidity REAL, button_pressed INTEGER)');
     dataBase1.serialize(() => {
        dataBase1.run('INSERT INTO sensorData (datetime, temperature, humidity, button_pressed) VALUES (?,?,?,?)',
        [dateTime, temperature, humidity, buttonPressed]);
