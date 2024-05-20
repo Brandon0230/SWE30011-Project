@@ -167,9 +167,7 @@ function changeLightStatus() {
     const onButton = document.getElementById('onButton');
     const offButton = document.getElementById('offButton');
     const sensorButton = document.getElementById('sensorButton');
-    const lightText = document.getElementById('lightState');
-    const slider = document.getElementById('tempSlider');
-    const sliderValue = document.getElementById('tempSliderVal');
+    const doorUnlocked = document.getElementById('doorUnlocked');
     const socket = io();
 
     onButton.addEventListener('click', () => {
@@ -185,10 +183,7 @@ function changeLightStatus() {
         lightText.textContent = "Sensor On";
         console.log('sensor');
     });
-    slider.addEventListener('click', () => {
-        socket.emit('tempSliderVal', slider.value);
-        sliderValue.textContent = slider.value;
-    });
+    
 }
 changeLightStatus();
 loadData();

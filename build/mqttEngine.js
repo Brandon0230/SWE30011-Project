@@ -84,8 +84,8 @@ class MQTTEngine extends events_1.EventEmitter {
                         console.log('Sensor data:', message.toString());
                         this.emit('sensor', message.toString());
                         break;
-                    case 'home/doorbell':
-                        this.emit('doorbell', message.toString());
+                    case 'home/unlocked':
+                        this.emit('unlocked', message.toString());
                         break;
                     default:
                         console.warn('Unknown topic:', topic);
