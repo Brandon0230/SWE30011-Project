@@ -17,6 +17,13 @@ socket.on('err', function(data){
 socket.on('conn', function(data){
     statusbox.innerHTML = 'Connected'
 });
+function addLockedStatus() {
+    socket.on("doorUnlocked", function(data) {
+        var doorStatus = document.getElementById("doorUnlocked");
+        doorUnlocked.innerHTML = data;
+    })
+
+}
 function generateCharts(){
     const ctx = document.getElementById('temperatureChart');
     
@@ -183,11 +190,12 @@ function changeLightStatus() {
         lightText.textContent = "Sensor On";
         console.log('sensor');
     });
-    
+
 }
 changeLightStatus();
 loadData();
 load2Data();
 loadButtonData();
 generateCharts();
+addLockedStatus();
 });

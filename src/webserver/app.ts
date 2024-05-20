@@ -11,7 +11,7 @@ const server = http.createServer(app);
 const io = new socketIO.Server(server);
 const mqttEngine = new MQTTEngine('192.168.1.31');
 const dataBase1 = new sqlite3.Database('sensorData.db');
-let sensorData = {temp: 0, humidity: 0, button_pressed: 0};
+let sensorData = {temp: 0, humidity: 0, unlocked: 0};
 
 mqttEngine.connect();
 
@@ -34,7 +34,7 @@ io.on('connection', socket => {
         setInterval(() => {
             if (canWriteToDB) {
                 canWriteToDB = false;
-                saveDataToDB(createLiveDateTime(), sensorData.temp, sensorData.humidity, sensorData.button_pressed);
+                saveDataToDB(createLiveDateTime(), sensorData.temp, sensorData.humidity, sensorData.unlocked);
                 setTimeout(() => {
                     canWriteToDB = true;
                 }, 1200);
@@ -57,12 +57,10 @@ io.on('connection', socket => {
             sensorData.temp = parseFloat(parts[0]);
             console.log(sensorData.temp);
             sensorData.humidity = parseFloat(parts[1]);
+            sensorData.unlocked = parts[2];
             io.emit('temp', sensorData.temp);
             io.emit('hum', sensorData.humidity);
-        });
-        mqttEngine.on('doorbell', (args) => {
-            sensorData.button_pressed = args;
-            io.emit('buttonOut', sensorData.button_pressed);
+            io.emit('doorUnlocked', sensorData.unlocked);
         });
 });
 server.listen(3000, () => {

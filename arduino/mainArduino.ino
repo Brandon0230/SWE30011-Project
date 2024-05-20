@@ -34,6 +34,7 @@ bool bacTextPrinted = false;
 bool bacText2Printed = false;
 bool servoMoved = false;
 bool doorLocked = false;
+bool doorLockedOut = true;
 int currentState = 0; //O=Passcode, 1=Alcohol, 2=Open,3=Pending Re-lock
 String password = "1345";
 int bacLevel;
@@ -79,32 +80,32 @@ void loop() {
 
   // Then check the current state
   if (currentState == 0) {
-   printSerial(doorLocked);
+   printSerial(temp, hum);
     togglePinPad();
   } 
   else if (currentState == 1) {
-    printSerial(doorLocked);
+    printSerial(temp, hum);
     toggleAlcohol();
   }
   else if (currentState == 2) {
-    printSerial(doorLocked);
+   printSerial(temp, hum);
     doorMotion(180);
   }
   else if (currentState == 3) {
-    printSerial(doorLocked);
+    printSerial(temp, hum);
     lockDoor();
   }
 }
-void printSerial(bool doorLocked) {
-   Serial.print(temp);
+void printSerial(float temp, float hum) {
+    Serial.print(temp);
     Serial.print(" ");
     Serial.print(hum);
     Serial.print(" ");
-      if(doorLocked) {
-    Serial.println("Locked");
-  }
-  else {
-    Serial.println("Unlocked");
+    if(!doorLockedOut) {
+      Serial.println("Unlocked"); 
+      }
+    else if(doorLockedOut) {
+      Serial.println("Locked");
   }
 }
 
@@ -117,7 +118,6 @@ String GetData() {
     }
   return receivedString; // Return the received string
 }
-
 
 void lcdInitial() {
   lcd.print("Please Enter Pin");
@@ -160,9 +160,6 @@ void togglePinPad() {
   // Read out the pirPin and store as val:
   val = digitalRead(PIRPin);
 }
-void logTempAndHum() {
-  
-}
 
 int toggleAlcohol()  {
   if (bacText2Printed == false) {
@@ -201,6 +198,7 @@ int toggleAlcohol()  {
       lcd.print("No Alcohol Detected");
       lcd.setCursor(0,1);
       lcd.print("Door Unlocked");
+      doorLockedOut = false;
       currentState = 2;
     }
   }
@@ -246,5 +244,6 @@ void lockDoor() {
       lcdInitial();
       lcdNewPin = true;
       doorLocked = false;
+      doorLockedOut = true;
     }
 }

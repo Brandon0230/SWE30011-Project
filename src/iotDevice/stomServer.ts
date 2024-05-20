@@ -39,29 +39,23 @@ arduinoPort()
         ardState = true;
         parser.on('data', (data: string) => {
             const parts = data.trim().split(' ');
-            if (parts.length === 2) {
+            if (parts.length == 3) {
                 const temperature = parseFloat(parts[0]);
                 const humidity = parseFloat(parts[1]);
+                const doorUnlock = parts[2];
                 console.log(temperature);
-                mqttEngine.sendMessage('sensor', `${temperature},${humidity}`);
-            }
-            else if (parts.length == 3) {
-                const temperature = parseFloat(parts[0]);
-                const humidity = parseFloat(parts[1]);
-                const motionOut = parts[2];
-                console.log(temperature);
-                mqttEngine.sendMessage('sensor', `${temperature},${humidity}`);
-                mqttEngine.sendMessage('motion', motionOut);
+                mqttEngine.sendMessage('sensor', `${temperature},${humidity}, ${doorUnlock}`);
             }
             else if (parts.length == 4) {
                 const temperature = parseFloat(parts[0]);
                 const humidity = parseFloat(parts[1]);
-                const motionOut = parts[2];
-                const doorUnlock = parts[3];
+                const doorUnlock = parts[2];
+                const motionOut = parts[3];
+                
                 console.log(temperature);
-                mqttEngine.sendMessage('sensor', `${temperature},${humidity}`);
+                mqttEngine.sendMessage('sensor', `${temperature},${humidity}, ${doorUnlock}`);
                 mqttEngine.sendMessage('motion', motionOut);
-                mqttEngine.sendMessage('door', doorUnlock);
+                
             }
         }
         );    
