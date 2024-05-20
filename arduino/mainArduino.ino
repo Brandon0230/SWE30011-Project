@@ -35,6 +35,7 @@ bool bacText2Printed = false;
 bool servoMoved = false;
 bool doorLocked = false;
 bool doorLockedOut = true;
+bool ledStatus = 2; //led state 0=Off, 1=On, 2=Sensor
 int currentState = 0; //O=Passcode, 1=Alcohol, 2=Open,3=Pending Re-lock
 String password = "1345";
 int bacLevel;
@@ -56,31 +57,11 @@ void setup() {
   Serial.begin(9600);
 }
 void loop() {
-    float temp = dht.readTemperature(); //reads Temp
+  float temp = dht.readTemperature(); //reads Temp
   float hum = dht.readHumidity(); //reads humidity
-   if (Serial.available() > 0) {
-    String receivedData = GetData(); // Call the GetData function to read the data
-    char receivedChar = receivedData.charAt(0); // Get the first character of the received data
-   }
-  // Check the motion sensor
-  val = digitalRead(PIRPin);
-  if (val == HIGH) {
-    setColour(255,255,255);
-    if (motionState == false) {
-      Serial.print("Motion detected");
-      Serial.print(" ");
-      motionState = true;
-    }
-  } else {
-    setColour(0,0,0);
-    if (motionState == true) {
-      motionState = false;
-    }
-  }
-
-  // Then check the current state
+  ledState();
   if (currentState == 0) {
-   printSerial(temp, hum);
+    printSerial(temp, hum);
     togglePinPad();
   } 
   else if (currentState == 1) {
@@ -96,6 +77,47 @@ void loop() {
     lockDoor();
   }
 }
+
+void ledState() {
+  if (Serial.available()) {
+    String portIncoming = Serial.readString();
+    if (portIncoming.startsWith("LEDOFF")) {
+        ledStatus = 0;
+    }
+    else if(portIncoming.startsWith("LEDON")) {
+        ledStatus = 1;
+    }
+    else if (portIncoming.startsWith("LEDSENSOR")) {
+        ledStatus = 2;
+    }
+    if (ledStatus == 0) {
+      setColour(0,0,0);
+    }
+    else if (ledStatus == 1) {
+      setColour(255,255,255);
+    }
+  }
+  if (ledStatus == 2) {
+      // Check the motion sensor
+    val = digitalRead(PIRPin);
+    if (val == HIGH) {
+      setColour(255,255,255);
+      if (motionState == false) {
+        Serial.print("Motion detected");
+        Serial.print(" ");
+        motionState = true;
+      }
+    } 
+    else {
+      setColour(0,0,0);
+      if (motionState == true) {
+        motionState = false;
+      }
+    }
+  }
+}
+
+
 void printSerial(float temp, float hum) {
     Serial.print(temp);
     Serial.print(" ");

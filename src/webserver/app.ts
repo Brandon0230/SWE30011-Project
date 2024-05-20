@@ -25,6 +25,7 @@ app.get('/', (req, res) => {
 mqttEngine.on('connect', () => {
     mqttEngine.subscribe('sensor');
     mqttEngine.subscribe('button');
+    mqttEngine.subscribe('led');
     mqttEngine.handleMessage();
 });
 
