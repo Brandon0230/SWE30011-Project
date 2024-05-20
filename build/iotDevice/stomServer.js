@@ -13,7 +13,7 @@ let mqttEngine = new mqttEngine_1.default('192.168.1.31');
 mqttEngine.connect();
 mqttEngine.on('connect', () => {
     mqttEngine.subscribe('sensor');
-    mqttEngine.subscribe('doorbell');
+    mqttEngine.subscribe('led');
     mqttEngine.handleMessage();
 });
 function arduinoPort() {
@@ -57,5 +57,16 @@ arduinoPort()
             mqttEngine.sendMessage('motion', motionOut);
         }
     });
+});
+mqttEngine.on('led', (message) => {
+    if (message === 'off') {
+        port.write('LEDOFF');
+    }
+    else if (message === 'on') {
+        port.write('LEDON');
+    }
+    else if (message === 'sensor') {
+        port.write('LEDSENSOR');
+    }
 });
 //# sourceMappingURL=stomServer.js.map

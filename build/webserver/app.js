@@ -22,7 +22,8 @@ app.get('/', (req, res) => {
 });
 mqttEngine.on('connect', () => {
     mqttEngine.subscribe('sensor');
-    mqttEngine.subscribe('doorbell');
+    mqttEngine.subscribe('button');
+    mqttEngine.subscribe('led');
     mqttEngine.handleMessage();
 });
 io.on('connection', socket => {
@@ -55,6 +56,17 @@ io.on('connection', socket => {
         io.emit('temp', sensorData.temp);
         io.emit('hum', sensorData.humidity);
         io.emit('doorUnlocked', sensorData.unlocked);
+    });
+    socket.on('led', (message) => {
+        if (message === 'off') {
+            mqttEngine.sendMessage('led', 'off');
+        }
+        else if (message === 'on') {
+            mqttEngine.sendMessage('led', 'on');
+        }
+        else if (message === 'sensor') {
+            mqttEngine.sendMessage('led', 'sensor');
+        }
     });
 });
 server.listen(3000, () => {

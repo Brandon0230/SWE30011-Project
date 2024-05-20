@@ -47,7 +47,7 @@ export default class MQTTEngine extends EventEmitter {
         this.client.publish(topic, message);
     }
     async handleMessage(){
-        this.client.on('message', (topic: string, message: Buffer) => {
+        this.client.on('message', async (topic: string, message: Buffer) => {
             switch (topic) {
                 case 'home/sensor':
                     console.log('Sensor data:', message.toString());
@@ -55,6 +55,10 @@ export default class MQTTEngine extends EventEmitter {
                     break;
                 case 'home/unlocked':
                     this.emit('unlocked', message.toString());
+                    break;
+                case 'home/led':
+                    console.log('led data:', message.toString());
+                    this.emit('led', message.toString());
                     break;
                 default:
                     console.warn('Unknown topic:', topic);

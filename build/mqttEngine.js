@@ -78,7 +78,7 @@ class MQTTEngine extends events_1.EventEmitter {
     }
     handleMessage() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.client.on('message', (topic, message) => {
+            this.client.on('message', (topic, message) => __awaiter(this, void 0, void 0, function* () {
                 switch (topic) {
                     case 'home/sensor':
                         console.log('Sensor data:', message.toString());
@@ -87,11 +87,15 @@ class MQTTEngine extends events_1.EventEmitter {
                     case 'home/unlocked':
                         this.emit('unlocked', message.toString());
                         break;
+                    case 'home/led':
+                        console.log('led data:', message.toString());
+                        this.emit('led', message.toString());
+                        break;
                     default:
                         console.warn('Unknown topic:', topic);
                         this.emit('warning', topic, message.toString());
                 }
-            });
+            }));
         });
     }
 }

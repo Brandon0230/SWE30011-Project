@@ -35,7 +35,7 @@ bool bacText2Printed = false;
 bool servoMoved = false;
 bool doorLocked = false;
 bool doorLockedOut = true;
-bool ledStatus = 2; //led state 0=Off, 1=On, 2=Sensor
+int ledStatus = 2; //led state 0=Off, 1=On, 2=Sensor
 int currentState = 0; //O=Passcode, 1=Alcohol, 2=Open,3=Pending Re-lock
 String password = "1345";
 int bacLevel;
@@ -79,7 +79,8 @@ void loop() {
 }
 
 void ledState() {
-  if (Serial.available()) {
+  Serial.println(ledStatus);
+  if (Serial.available() > 0) {
     String portIncoming = Serial.readString();
     if (portIncoming.startsWith("LEDOFF")) {
         ledStatus = 0;
@@ -107,8 +108,9 @@ void ledState() {
         Serial.print(" ");
         motionState = true;
       }
+    
     } 
-    else {
+  else {
       setColour(0,0,0);
       if (motionState == true) {
         motionState = false;
@@ -130,17 +132,6 @@ void printSerial(float temp, float hum) {
       Serial.println("Locked");
   }
 }
-
-String GetData() {
-  String receivedString = "";
-   while (Serial.available() > 0) {
-      char incomingChar = Serial.read(); // Read the incoming byte
-      receivedString += incomingChar; // Append the character to the string
-      delay(2); // Delay to allow the next character to arrive
-    }
-  return receivedString; // Return the received string
-}
-
 void lcdInitial() {
   lcd.print("Please Enter Pin");
   lcd.setCursor(0,1);
@@ -179,8 +170,6 @@ void togglePinPad() {
     enteredPassword = "";
   }
   }
-  // Read out the pirPin and store as val:
-  val = digitalRead(PIRPin);
 }
 
 int toggleAlcohol()  {
