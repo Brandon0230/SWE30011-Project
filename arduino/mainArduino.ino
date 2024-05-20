@@ -227,6 +227,7 @@ void lockDoor() {
   unsigned long currentMillis = millis();
   if (digitalRead(buttonPin) == LOW) {
       doorLocked = true;
+      doorLockedOut = true;
       lcd.clear();
       lcd.setCursor(0,0);
       lcd.print("Door is Locked.");
@@ -244,6 +245,5 @@ void lockDoor() {
       lcdInitial();
       lcdNewPin = true;
       doorLocked = false;
-      doorLockedOut = true;
     }
 }

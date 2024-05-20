@@ -46,36 +46,16 @@ arduinoPort()
             const temperature = parseFloat(parts[0]);
             const humidity = parseFloat(parts[1]);
             const doorUnlock = parts[2];
-            console.log(temperature);
-            mqttEngine.sendMessage('sensor', `${temperature},${humidity}, ${doorUnlock}`);
+            mqttEngine.sendMessage('sensor', `${temperature},${humidity},${doorUnlock}`);
         }
         else if (parts.length == 4) {
             const temperature = parseFloat(parts[0]);
             const humidity = parseFloat(parts[1]);
             const doorUnlock = parts[2];
             const motionOut = parts[3];
-            console.log(temperature);
-            mqttEngine.sendMessage('sensor', `${temperature},${humidity}, ${doorUnlock}`);
+            mqttEngine.sendMessage('sensor', `${temperature},${humidity},${doorUnlock}`);
             mqttEngine.sendMessage('motion', motionOut);
         }
     });
-    mqttEngine.on('sensor', (args) => {
-        if (port) {
-            switch (args) {
-                case 'on':
-                    port.write('y');
-                    break;
-                case 'off':
-                    port.write('z');
-                    break;
-                default:
-                    console.warn('Unknown sensor command:', args);
-                    break;
-            }
-        }
-    });
-})
-    .catch(err => {
-    console.error(err);
 });
 //# sourceMappingURL=stomServer.js.map

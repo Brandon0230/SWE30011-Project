@@ -48,10 +48,8 @@ io.on('connection', socket => {
         mqttEngine.sendMessage('sensor', 'on');
     });
     mqttEngine.on('sensor', (args) => {
-        console.log(args);
         const parts = args.split(',');
         sensorData.temp = parseFloat(parts[0]);
-        console.log(sensorData.temp);
         sensorData.humidity = parseFloat(parts[1]);
         sensorData.unlocked = parts[2];
         io.emit('temp', sensorData.temp);
