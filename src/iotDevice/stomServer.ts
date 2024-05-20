@@ -56,3 +56,12 @@ arduinoPort()
         }
         );    
     })
+    mqttEngine.on('led', (message) => {
+        if (message === 'off') {
+            port.write('LEDOFF')
+        } else if (message === 'on') {
+            port.write('LEDON')
+        } else if (message === 'sensor') {
+            port.write('LEDSENSOR');
+        }
+    });

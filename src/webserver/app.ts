@@ -4,6 +4,7 @@ import http from "http";
 import path from "path";
 import sqlite3 from "sqlite3";
 import MQTTEngine from "../mqttEngine";
+import mqtt from "mqtt/*";
 
 
 const app = express();
@@ -23,7 +24,7 @@ app.get('/', (req, res) => {
 
 mqttEngine.on('connect', () => {
     mqttEngine.subscribe('sensor');
-    mqttEngine.subscribe('doorbell');
+    mqttEngine.subscribe('button');
     mqttEngine.handleMessage();
 });
 
@@ -59,6 +60,15 @@ io.on('connection', socket => {
             io.emit('temp', sensorData.temp);
             io.emit('hum', sensorData.humidity);
             io.emit('doorUnlocked', sensorData.unlocked);
+        });
+        socket.on('led', (message) => {
+            if (message === 'off') {
+                mqttEngine.sendMessage('led', 'off');
+            } else if (message === 'on') {
+                mqttEngine.sendMessage('led', 'on');
+            } else if (message === 'sensor') {
+                mqttEngine.sendMessage('led', 'sensor');
+            }
         });
 });
 server.listen(3000, () => {

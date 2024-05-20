@@ -177,19 +177,17 @@ function changeLightStatus() {
     const doorUnlocked = document.getElementById('doorUnlocked');
     const socket = io();
 
-    onButton.addEventListener('click', () => {
-        socket.emit('turnOn');
-        lightText.textContent = "Light On";
+    document.getElementById('offButton').addEventListener('click', () => {
+        socket.emit('led', 'off');
     });
-    offButton.addEventListener('click', () => {
-        socket.emit('turnOff');
-        lightText.textContent = "Light Off";
+    
+    document.getElementById('onButton').addEventListener('click', () => {
+        socket.emit('led', 'on');
     });
-    sensorButton.addEventListener('click', () => {
-        socket.emit('sensorOn');
-        lightText.textContent = "Sensor On";
-        console.log('sensor');
-    });
+    
+    document.getElementById('sensorButton').addEventListener('click', () => {
+        socket.emit('led', 'sensor');
+    });;
 
 }
 changeLightStatus();
