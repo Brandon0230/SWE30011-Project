@@ -2,6 +2,8 @@
 #include <LiquidCrystal.h>
 #include <Servo.h>
 #include <DHT.h>
+#include <ctype.h>
+
 const byte ROWS = 4; 
 const byte COLS = 4; 
 char hexaKeys[ROWS][COLS] = {
@@ -24,6 +26,8 @@ Keypad customKeypad = Keypad(makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS)
 #define buttonPin 25
 #define DHTPin 12
 #define DHTTYPE DHT11
+#define buzzerPin 50
+#define buzzerBtn 52
 int val = 0;
 const int rs = 45, en = 44, d4 = 43, d5 = 42, d6 = 41, d7 = 40;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
@@ -35,6 +39,8 @@ bool bacText2Printed = false;
 bool servoMoved = false;
 bool doorLocked = false;
 bool doorLockedOut = true;
+bool buzzerOn = true;
+bool buzzerPrev = true;
 int ledStatus = 2; //led state 0=Off, 1=On, 2=Sensor
 int currentState = 0; //O=Passcode, 1=Alcohol, 2=Open,3=Pending Re-lock
 String password = "1345";
@@ -50,6 +56,7 @@ void setup() {
   pinMode(PIRPin, INPUT);
   pinMode(alcoholSensor, INPUT);
   pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(buzzerPin, INPUT_PULLUP);
   dht.begin();
   lcd.begin(16,2);
   lcdInitial();
@@ -59,7 +66,7 @@ void setup() {
 void loop() {
   float temp = dht.readTemperature(); //reads Temp
   float hum = dht.readHumidity(); //reads humidity
-  ledState();
+  bool buzzerNoise = LedBuzzerState();
   if (currentState == 0) {
     printSerial(temp, hum);
     togglePinPad();
@@ -73,32 +80,52 @@ void loop() {
     doorMotion(180);
   }
   else if (currentState == 3) {
+    if (buzzerNoise) {
+      tone(buzzerPin, 1200);
+      buzzerNoise = false;
+    }
     printSerial(temp, hum);
     lockDoor();
   }
+  if (digitalRead(buzzerBtn) == LOW) {
+      buzzerNoise = false;
+      noTone(buzzerPin);
+      
+    }
+  
 }
 
-void ledState() {
+bool LedBuzzerState() {
   Serial.println(ledStatus);
   if (Serial.available() > 0) {
     String portIncoming = Serial.readString();
-    if (portIncoming.startsWith("LEDOFF")) {
-        ledStatus = 0;
+    if(portIncoming == 'LEDOFF')
+    {
+            setColour(0,0,0);
     }
-    else if(portIncoming.startsWith("LEDON")) {
-        ledStatus = 1;
+    else if (portIncoming == 'LEDON') {
+        setColour(255,255,255);
     }
-    else if (portIncoming.startsWith("LEDSENSOR")) {
-        ledStatus = 2;
+
+    else if (portIncoming == 'LEDSENSOR') {
+        checkMotion();
     }
-    if (ledStatus == 0) {
-      setColour(0,0,0);
+    else if (portIncoming == '0') {
+      buzzerOn = false;
     }
-    else if (ledStatus == 1) {
-      setColour(255,255,255);
+    if (buzzerPrev == true) {
+      delay(500);
     }
+    else {
+    if (portIncoming == '1')
+    {
+        buzzerOn = true;
+    }
+    }
+    return buzzerOn;
   }
-  if (ledStatus == 2) {
+ }
+ void checkMotion(){
       // Check the motion sensor
     val = digitalRead(PIRPin);
     if (val == HIGH) {
@@ -116,10 +143,8 @@ void ledState() {
         motionState = false;
       }
     }
-  }
+  
 }
-
-
 void printSerial(float temp, float hum) {
     Serial.print(temp);
     Serial.print(" ");
