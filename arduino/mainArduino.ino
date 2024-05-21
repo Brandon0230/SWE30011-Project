@@ -117,10 +117,10 @@ bool LedBuzzerState() {
       delay(500);
     }
     else {
-    if (portIncoming == '1')
-    {
-        buzzerOn = true;
-    }
+      if (portIncoming == '1')
+      {
+          buzzerOn = true;
+      }
     }
     return buzzerOn;
   }
