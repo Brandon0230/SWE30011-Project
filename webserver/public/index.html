@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arduino Control Dashboard</title>
+    <link rel="stylesheet" href="styles.css"/>
+    <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment/dist/chartjs-adapter-moment.min.js"></script>
+    <script src="renderer.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Arduino Control Dashboard</h1>
+    </header>
+    <div class="grid-container">
+        <div class="widget status">
+            <h2 class="title">System Status</h2>
+            <p id="Status">--</p>
+        </div>
+        <div class="widget temperature">
+            <h2 class="title">Temperature</h2>
+            <canvas id="temperatureChart"></canvas>
+            <p id="Temp">-- °C</p>
+        </div>
+        <div class="widget humidity">
+            <h2 class="title">Humidity</h2>
+            <canvas id="humidityChart"></canvas>
+            <p id="Humid">-- %</p>
+        </div>
+        <div class="widget door">
+            <h2 class="title">Door Status</h2>
+            <div id="doorStatus" class="door-status">
+                <img id="doorIcon" src="" alt="Door Icon">
+                <span id="doorText">--</span>
+            </div>
+        </div>
+        <div class="widget light">
+            <h2 class="title">Light Controls</h2>
+            <button id="sensorButton">Sensor Mode</button>
+            <button id="sensorOn">On</button>
+            <button id="sensorOff">Off</button>
+            <p id="lightState">Sensor On</p>
+        </div>
+    </div>
+</body>
+</html>
