@@ -24,7 +24,7 @@ import { Info } from "lucide-svelte";
                 </div>
                 <div class="bg-emerald-500 rounded-md flex-grow p-2">
                     <!-- First column, second row content -->
-                    <h2>Hello</h2>
+                    <h2>Howdy</h2>
                 </div>
             </div>
 
