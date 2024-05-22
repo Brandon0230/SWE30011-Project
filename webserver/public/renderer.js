@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			}
 			const currentTime = Date.now();
 			if (currentTime - lastUpdateTime >= 1000) {
-				temp.textContent = data + " °C";
+				temp.textContent = `${data} °C`;
 				console.log(data);
 				updateChart("temp", data);
 				lastUpdateTime = currentTime;
@@ -143,13 +143,13 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 	function load2Data() {
 		let lastUpdateTime = 0;
-		socket.on("hum", function (data) {
-			if (data !== NaN) {
-				var humid = document.getElementById("Humid");
-				humid.textContent = data + " %";
+		const humid = document.getElementById("Humid");
+		socket.on("hum", (data) => {
+			if (!Number.isNaN(data)) {
+				humid.textContent = `${data} %`;
 				function updateChart2(chart, data) {
 					switch (chart) {
-						case "hum":
+						case "hum": {
 							const currentTime = Date.now();
 							humidData.x.push(currentTime);
 							humidData.y.push(data);
@@ -167,11 +167,12 @@ document.addEventListener("DOMContentLoaded", () => {
 							humidityChart.data.datasets[0].data = humidData.y;
 							humidityChart.update();
 							break;
+						}
 					}
 				}
 				const currentTime = Date.now();
 				if (currentTime - lastUpdateTime >= 1000) {
-					humid.textContent = data + " %";
+					humid.textContent = `${data} %`;
 					updateChart2("hum", data);
 					lastUpdateTime = currentTime;
 				}
@@ -179,13 +180,11 @@ document.addEventListener("DOMContentLoaded", () => {
 		});
 	}
 	function loadButtonData() {
-		socket.on("buttonOut", function (data) {
+		socket.on("buttonOut", (data) => {
 			const currentLiveTime = new Date().toLocaleTimeString();
 			const currentDate = new Date().toLocaleDateString("en-GB");
-			var button = document.getElementById("doorButton");
-			button.innerHTML =
-				`<div>${data} at ${currentLiveTime} on ${currentDate}</div>` +
-				button.innerHTML;
+			const button = document.getElementById("doorButton");
+			button.innerHTML = `<div>${data} at ${currentLiveTime} on ${currentDate}${button.innerHTML}</div>`;
 		});
 	}
 
