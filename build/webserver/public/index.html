@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Arduino Data</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arduino Control Dashboard</title>
     <link rel="stylesheet" href="styles.css"/>
     <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
@@ -10,70 +12,38 @@
     <script src="renderer.js"></script>
 </head>
 <body>
-    <h1>Arduino Data:</h1>
-    <div class="widget-container">
-        <div class="widget">
-            <div class="title">Status</div>
-            <div class="content">
-                <span id="Status">--</span>
+    <header>
+        <h1>Arduino Control Dashboard</h1>
+    </header>
+    <div class="grid-container">
+        <div class="widget status">
+            <h2 class="title">System Status</h2>
+            <span id="Status">--</span>
+        </div>
+        <div class="widget temperature">
+            <h2 class="title">Temperature</h2>
+            <canvas id="temperatureChart"></canvas>
+            <div id="Temp">-- °C</div>
+        </div>
+        <div class="widget humidity">
+            <h2 class="title">Humidity</h2>
+            <canvas id="humidityChart"></canvas>
+            <div id="Humid">-- %</div>
+        </div>
+        <div class="widget door">
+            <h2 class="title">Door Status</h2>
+            <div id="doorStatus" class="door-status">
+                <img id="doorIcon" src="img/locked-icon.png" alt="Door Icon">
+                <span id="doorText">Locked</span>
             </div>
         </div>
-        <div class="widget">
-            <div class="title">Environment</div>
-            <div class="content">
-                <div class="widget-container">
-                    <div class="widget">
-                        <div class="title">Temperature</div>
-                        <div class="content">
-                            <div>
-                                <canvas id="temperatureChart"></canvas>
-                            </div>
-                            <div id="Temp">
-                                --
-                            </div>
-                        </div>
-                    </div>
-                    <div class="widget">
-                        <div class="title">Humidity</div>
-                        <div class="content">
-                            <div>
-                                <canvas id="humidityChart"></canvas>
-                            </div>
-                            <div id="Humid">
-                                --
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="widget light">
+            <h2 class="title">Light Controls</h2>
+            <button id="sensorButton">Sensor Mode</button>
+            <button id="onButton">On</button>
+            <button id="offButton">Off</button>
+            <div id="lightState">Sensor On</div>
         </div>
-        <div class="widget">
-            <div class="title">Door Status</div>
-            <div class="content">
-                <div id="doorUnlocked">
-                    --
-                </div>
-            </div>
-        </div>
-        <div class="widget">
-            <div class="title">Light</div>
-            <div class="content">
-                <div id="Light">
-                    <input type="button" value="ON" id="onButton" onclick="">
-                    <input type="button" value="OFF" id="offButton" onclick="">
-                    <input type="button" value="SENSOR" id="sensorButton" onclick="">
-                    <br><br>
-                    <div id="lightState">Sensor On</div>
-                    <br><br>
-                    
-                    <label for="tempSlider">Hot Temperature:</label>
-                    <input type="range" id="tempSlider" name="slider" min="0" max="100" value="50">
-                    <span id ="tempSliderVal">50</span>
-                </div>
-            </div>
-        </div>
-
-
     </div>
 </body>
 </html>

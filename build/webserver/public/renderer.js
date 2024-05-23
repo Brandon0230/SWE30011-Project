@@ -19,8 +19,15 @@ socket.on('conn', function(data){
 });
 function addLockedStatus() {
     socket.on("doorUnlocked", function(data) {
-        var doorStatus = document.getElementById("doorUnlocked");
-        doorUnlocked.innerHTML = data;
+        var doorStatus = document.getElementById("doorText");
+        doorStatus.innerHTML = data;
+        var doorIcon = document.getElementById("doorIcon");
+        if (data == "Unlocked"){
+            doorIcon.src = "img/unlocked-icon.png";
+        }
+        else if (data == "Locked"){
+            doorIcon.src = "img/locked-icon.png";
+        }
     })
 
 }
