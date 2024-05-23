@@ -121,9 +121,9 @@ void updateSensors(){
     Serial.print(hum);
     Serial.print(" ");
     if (doorUnlocked){
-        Serial.println("Door Unlocked");
+        Serial.println("Unlocked");
     } else {
-        Serial.println("Door Locked");
+        Serial.println("Locked");
     }
     if (motionSensorEnabled){
         PIRValue = digitalRead(PIRPin);
