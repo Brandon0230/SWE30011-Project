@@ -62,6 +62,7 @@ void setup(){
     pinMode(buzzerPin, INPUT_PULLUP);
     dht.begin();
     lcd.begin(16,2);
+    servoM.attach(servoPin);
     // Begin serial communication at a baud rate of 9600:
     Serial.begin(9600);
     displayStartScreen();
@@ -180,6 +181,7 @@ void LockUnlockProcess(){
             } else {
                 unlockDoor();
             }
+            break;
     }
     if (awaitingButtonPress){
         if(digitalRead(buttonPin) == LOW){
@@ -214,6 +216,8 @@ void checkKeypad(){
                     lcd.clear();
                     lcd.setCursor(0,0);
                     lcd.print("Correct Pin");
+                    lcd.setCursor(0, 1);
+                    lcd.print("Press Btn to Con");
                     awaitingButtonPress = true;
                 }else{
                     lcd.clear();
@@ -222,6 +226,7 @@ void checkKeypad(){
                     enteredPassword = "";
                     wait(2000);
                     lcd.clear();
+                    displayStartScreen();
                 }
                 break;
         }
@@ -234,9 +239,10 @@ void checkAlcohol(){
         case 0:
             lcd.clear();
             lcd.setCursor(0,0);
-            lcd.print("Blow into sensor for 5 seconds");
+            lcd.print("Blow into sensor for 5s");
             lcd.setCursor(0,1);
-            lcd.print("Press Button  to start");
+            lcd.print("Press Btn");
+            wait(50);
             if(digitalRead(buttonPin) == LOW){
                 progressionState++;
             }
@@ -245,7 +251,7 @@ void checkAlcohol(){
             lcd.clear();
             lcd.setCursor(0,0);
             lcd.print("Blow...");
-            wait(5000);
+            wait(2000);
             alcoholValue = analogRead(alcoholSensor);
             progressionState++;
             break;
@@ -260,53 +266,50 @@ void checkAlcohol(){
                 wait(2000);
                 lcd.clear();
                 lcd.print("Press Button to continue");
+                unlockProcessState = 0;
+                timer1 = millis();
             } else {
                 alcoholDetected = false;
                 lcd.clear();
                 lcd.setCursor(0,0);
                 lcd.print("No Alcohol Detected");
                 lcd.setCursor(0,1);
-                lcd.print("Door Unlocked");
+                lcd.print("Door Unlocked");  
+                unlockDoor();
+                if (millis + 5000 >= timer1)
+                {
+                  toggleBuzzer(true);
+                }
+                lcd.clear();
+                lcd.setCursor(0,0);
+                lcd.print("Press Btn to Lock");
             }
             if(digitalRead(buttonPin) == LOW){
-                progressionState++;
-            }
+                progressionState = 0;
+                toggleBuzzer(false);
+                lockDoor();
+
+            } 
             break;
-        case 3:
-            lcd.clear();
-            if (alcoholDetected){
-                doorUnlocked = false;
-            } else {
-                doorUnlocked = true;
-            }
-            progressionState = 0;
-            awaitingButtonPress = true;
-            timer1 = millis();
-            break;
-        
     }
 }
 
 void unlockDoor(){
-    servoM.attach(11);
-    servoM.write(180);
+    servoM.write(45);
     wait(2000);
+    lcd.print("Door Unlocked");
 }
 void lockDoor(){
-    if (millis() - timer1 > 5000){
-        awaitingButtonPress = true;
-        toggleBuzzer(true);
-    }
-    if (awaitingButtonPress){
-        if(digitalRead(buttonPin) == LOW){
-            awaitingButtonPress = false;
-            lcd.clear();
-            lcd.setCursor(0,0);
-            lcd.print("Door Locked");
-            unlockProcessState = 0;
-            servoM.write(0);
-            wait(2000);
-        }
-    }
+    awaitingButtonPress = false;
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Door Locked");
+    toggleBuzzer(false);
+    unlockProcessState = 0;
+    enteredPassword = ""; // Clear entered password
+    doorUnlocked = false; // Lock the door
+    servoM.write(0);
+    wait(1500);
+    displayStartScreen();
     
 }
